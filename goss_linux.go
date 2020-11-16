@@ -52,18 +52,17 @@ func Connections(kind string) ([]*Stat, error) {
 
 func ConnectionsWithProtocol(protocol uint8) ([]*InetDiagMsg, error) {
 	hdr := syscall.NlMsghdr{
-		Type:  uint16(SOCK_DIAG_BY_FAMILY),
+		Type:  uint16(TCPDIAG_GETSOCK),
 		Flags: uint16(syscall.NLM_F_DUMP | syscall.NLM_F_REQUEST),
 		Pid:   uint32(0),
 	}
-	req := InetDiagReqV2{
-		Family:   uint8(AF_INET),
-		Protocol: protocol,
-		States:   AllTCPStates,
+	req := InetDiagReq{
+		Family: uint8(AF_INET),
+		States: AllTCPStates,
 	}
-	var sizeofInetDiagReqV2 = int(unsafe.Sizeof(InetDiagReqV2{}))
+	var sizeofInetDiagReq = int(unsafe.Sizeof(InetDiagReq{}))
 	byteOrder := GetEndian()
-	buf := bytes.NewBuffer(make([]byte, sizeofInetDiagReqV2))
+	buf := bytes.NewBuffer(make([]byte, sizeofInetDiagReq))
 	buf.Reset()
 	if err := binary.Write(buf, byteOrder, req); err != nil {
 		// This never returns an error.
